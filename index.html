@@ -108,6 +108,33 @@
 
             <!-- TAB 1: DASHBOARD & COUNTDOWN -->
             <div id="tab-dashboard" class="tab-content active space-y-6">
+                <!-- LIVE SHARED GOOGLE CALENDAR CONTAINER -->
+<div class="glass-card rounded-2xl p-6 border border-slate-800">
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h3 class="text-lg font-bold text-white">
+                <i class="fa-solid fa-calendar-days text-cyan-400 mr-2"></i>Vietnam Expedition Shared Schedule
+            </h3>
+            <p class="text-xs text-slate-400">View live itinerary or add events directly below.</p>
+        </div>
+        <a href="https://calendar.google.com" target="_blank" class="bg-cyan-600/80 hover:bg-cyan-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition flex items-center space-x-1">
+            <i class="fa-solid fa-plus"></i><span>Add Event</span>
+        </a>
+    </div>
+
+    <!-- RESPONSIVE GOOGLE CALENDAR IFRAME -->
+    <div class="w-full h-[500px] rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
+        <!-- REPLACE THE SRC BELOW WITH YOUR OWN GOOGLE CALENDAR EMBED URL -->
+        <iframe 
+            src="https://calendar.google.com/calendar/embed?src=YOUR_CALENDAR_ID_HERE&ctz=America%2FToronto" 
+            style="border: 0" 
+            width="100%" 
+            height="100%" 
+            frameborder="0" 
+            scrolling="no">
+        </iframe>
+    </div>
+</div>
                 
                 <!-- COUNTDOWN & DATE CONFIG BANNER -->
                 <div class="glass-card rounded-2xl p-6 relative overflow-hidden border border-cyan-500/20">
