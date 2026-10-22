@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietnam Expedition 2027 | Mark, Danny, Bill & Rich</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.85)), url('https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2000&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- PASSWORD LOCK SCREEN -->
+    <div id="lock-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-xl px-4">
+        <div class="glass-card p-8 rounded-2xl max-w-md w-full shadow-2xl text-center border border-cyan-500/30">
+            <div class="w-16 h-16 bg-cyan-500/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-white">Vietnam Expedition 2027</h2>
+            <p class="text-slate-400 text-sm mb-6">Restricted Hub for Mark, Danny, Bill & Rich. Enter group passcode to enter.</p>
+            <form onsubmit="unlockHub(event)" class="space-y-4">
+                <input type="password" id="passcode-input" placeholder="Enter Passcode (e.g., 2026)" class="w-full px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-center text-lg tracking-widest text-white focus:outline-none focus:border-cyan-500" required>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-xl shadow-lg transition-all">Unlock Hub</button>
+            </form>
+            <p id="error-msg" class="text-red-400 text-xs mt-3 hidden">Incorrect passcode. Try '2026'.</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div id="main-app" class="flex flex-col min-h-screen opacity-0 transition-opacity duration-700 pointer-events-none">
+        
+        <!-- HEADER -->
+        <header class="sticky top-0 z-40 glass-nav px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-cyan-500/20 text-cyan-400 p-2.5 rounded-xl border border-cyan-500/30">
+                    <i class="fa-solid fa-plane-departure text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">Vietnam 2027 Hub</h1>
+                    <p class="text-xs text-cyan-300 font-medium">Mark • Danny • Bill • Rich</p>
+                </div>
+            </div>
+
+            <!-- Currency Ticker Badge -->
+            <div class="hidden md:flex items-center space-x-2 bg-slate-900/80 border border-cyan-500/30 px-3 py-1.5 rounded-xl text-xs">
+                <span class="text-cyan-400 font-semibold"><i class="fa-solid fa-chart-line mr-1"></i> Live Rate:</span>
+                <span class="text-slate-200">1 CAD $\approx$ 18,500 ₫</span>
+                <span class="text-slate-500">|</span>
+                <span class="text-slate-400">$20 CAD = ~370k ₫</span>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="lockHubAgain()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-lock text-slate-400"></i>
+                    <span class="hidden sm:inline">Lock Hub</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- NAVIGATION TABS -->
+        <nav class="bg-slate-900/60 border-b border-slate-800 px-4 overflow-x-auto">
+            <div class="max-w-7xl mx-auto flex space-x-2 py-2">
+                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition bg-cyan-600 text-white shadow-md flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-house"></i><span>Dashboard & Countdown</span>
+                </button>
+                <button onclick="switchTab('map')" id="btn-map" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-map-location-dot"></i><span>Maps & Photo Pins</span>
+                </button>
+                <button onclick="switchTab('blogs')" id="btn-blogs" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-book-open"></i><span>Travel Blogs</span>
+                </button>
+                <button onclick="switchTab('logistics')" id="btn-logistics" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-file-shield"></i><span>Logistics & Expenses</span>
+                </button>
+                <button onclick="switchTab('tools')" id="btn-tools" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-toolbox"></i><span>Utilities & Packing</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6">
+
+            <!-- TAB 1: DASHBOARD & COUNTDOWN -->
+            <div id="tab-dashboard" class="tab-content active space-y-6">
+                
+                <!-- COUNTDOWN & DATE CONFIG BANNER -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden border border-cyan-500/20">
+                    <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl text-cyan-400 pointer-events-none">
+                        <i class="fa-solid fa-umbrella-beach"></i>
+                    </div>
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
+                        <div>
+                            <span id="countdown-status-badge" class="bg-cyan-500/20 text-cyan-400 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-cyan-500/30">Phase 1: Pre-Trip Countdown</span>
+                            <h2 id="countdown-title" class="text-2xl lg:text-3xl font-extrabold text-white mt-2">Countdown to Toronto (YYZ) Departure</h2>
+                            <p id="countdown-sub" class="text-slate-400 text-sm mt-1">Trip Window: <span id="display-dates" class="text-cyan-300 font-semibold">Feb 1, 2027 – Feb 18, 2027</span></p>
+                        </div>
+                        <button onclick="toggleDateEditor()" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center space-x-2">
+                            <i class="fa-solid fa-calendar-days"></i><span>Edit Trip Dates</span>
+                        </button>
+                    </div>
+
+                    <!-- Date Editor Drawer (Hidden by default) -->
+                    <div id="date-editor-panel" class="hidden bg-slate-900/90 border border-slate-700 p-4 rounded-xl mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Departure Date (Toronto)</label>
+                            <input type="date" id="input-dep-date" value="2027-02-01" class="w-full bg-slate-800 border border-slate-750 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Return Date (Back Home)</label>
+                            <input type="date" id="input-ret-date" value="2027-02-18" class="w-full bg-slate-800 border border-slate-750 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div class="sm:col-span-2 flex justify-end">
+                            <button onclick="saveTripDates()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition">Apply New Dates</button>
+                        </div>
+                    </div>
+
+                    <!-- Countdown Clock Boxes -->
+                    <div id="countdown-clock-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
+                            <div id="days-val" class="text-3xl lg:text-4xl font-black text-cyan-400">00</div>
+                            <div class="text-xs text-slate-400 uppercase tracking-widest mt-1">Days</div>
+                        </div>
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
+                            <div id="hours-val" class="text-3xl lg:text-4xl font-black text-white">00</div>
+                            <div class="text-xs text-slate-400 uppercase tracking-widest mt-1">Hours</div>
+                        </div>
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
+                            <div id="mins-val" class="text-3xl lg:text-4xl font-black text-white">00</div>
+                            <div class="text-xs text-slate-400 uppercase tracking-widest mt-1">Minutes</div>
+                        </div>
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
+                            <div id="secs-val" class="text-3xl lg:text-4xl font-black text-cyan-300">00</div>
+                            <div class="text-xs text-slate-400 uppercase tracking-widest mt-1">Seconds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUICK ACTIONS GRID -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Google Photos Vault -->
+                    <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center text-xl mb-4 border border-pink-500/30">
+                                <i class="fa-solid fa-photo-film"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-1">Google Photos Vault</h3>
+                            <p class="text-slate-400 text-sm mb-4">Dump, sync and share all high-res group photos and videos from iPhones and Androids.</p>
+                        </div>
+                        <a href="https://photos.google.com" target="_blank" class="w-full bg-pink-600/80 hover:bg-pink-600 text-white font-semibold py-2.5 px-4 rounded-xl text-center text-sm transition flex items-center justify-center space-x-2">
+                            <span>Open Shared Album</span><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                        </a>
+                    </div>
+
+                    <!-- Flight & Transport Matrix -->
+                    <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl mb-4 border border-blue-500/30">
+                                <i class="fa-solid fa-plane"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-1">Flight & Train Matrix</h3>
+                            <p class="text-slate-400 text-sm mb-4">Quick reference for flight numbers, international segments, and domestic sleeper trains.</p>
+                        </div>
+                        <button onclick="switchTab('logistics')" class="w-full bg-blue-600/80 hover:bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-xl text-center text-sm transition flex items-center justify-center space-x-2">
+                            <span>View Flight Details</span><i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- Splitwise / Expenses -->
+                    <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl mb-4 border border-emerald-500/30">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-1">Group Expense Splitter</h3>
+                            <p class="text-slate-400 text-sm mb-4">Track dinners, hotel bills, Grab rides and tours instantly among Mark, Danny, Bill, & Rich.</p>
+                        </div>
+                        <a href="https://splitwise.com" target="_blank" class="w-full bg-emerald-600/80 hover:bg-emerald-600 text-white font-semibold py-2.5 px-4 rounded-xl text-center text-sm transition flex items-center justify-center space-x-2">
+                            <span>Open Splitwise</span><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: MAPS & PHOTO PINS -->
+            <div id="tab-map" class="tab-content space-y-6">
+                <div class="glass-card rounded-2xl p-6 border border-slate-800">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-map-location-dot text-cyan-400 mr-2"></i>Interactive Google Maps & Photo Mapping</h2>
+                            <p class="text-slate-400 text-sm">Jump directly to key Vietnam waypoints or map your group photo memories to specific locations.</p>
+                        </div>
+                        <!-- City Presets Switcher -->
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="setMapLocation('Hanoi')" class="bg-slate-800 hover:bg-cyan-600 text-xs text-white font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">Hanoi</button>
+                            <button onclick="setMapLocation('Ha Long Bay')" class="bg-slate-800 hover:bg-cyan-600 text-xs text-white font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">Ha Long Bay</button>
+                            <button onclick="setMapLocation('Da Nang')" class="bg-slate-800 hover:bg-cyan-600 text-xs text-white font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">Da Nang & Hoi An</button>
+                            <button onclick="setMapLocation('Ho Chi Minh City')" class="bg-slate-800 hover:bg-cyan-600 text-xs text-white font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">Saigon (HCMC)</button>
+                        </div>
+                    </div>
+
+                    <!-- Embed Google Map Container -->
+                    <div class="w-full h-96 rounded-xl overflow-hidden border border-slate-700 mb-6 relative">
+                        <iframe id="google-map-frame" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.8638558814757!2d105.84117097688258!3d21.028511487539655!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab9bd9861ca1%3A0xe788f86bcfb6ea60!2sHanoi%2C%20Hoan%20Kiem%2C%20Hanoi%2C%20Vietnam!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca"></iframe>
+                    </div>
+
+                    <!-- Photo Pin Logger Form -->
+                    <div class="bg-slate-900/80 p-6 rounded-xl border border-slate-800">
+                        <h3 class="text-md font-bold text-white mb-3"><i class="fa-solid fa-camera-retro text-pink-400 mr-2"></i>Log Photo Memory Location</h3>
+                        <form onsubmit="addPhotoPin(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <input type="text" id="pin-title" placeholder="Location Name (e.g. Train Street Hanoi)" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500" required>
+                            <select id="pin-author" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500">
+                                <option value="Mark">Mark</option>
+                                <option value="Danny">Danny</option>
+                                <option value="Bill">Bill</option>
+                                <option value="Rich">Rich</option>
+                            </select>
+                            <input type="text" id="pin-notes" placeholder="Quick caption or photo highlight..." class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500" required>
+                            <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2 px-4 rounded-xl text-sm transition">Save Pin</button>
+                        </form>
+                        <!-- Logged Pins Container -->
+                        <div id="pins-list" class="mt-4 space-y-2">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: TRAVEL BLOGS -->
+            <div id="tab-blogs" class="tab-content space-y-6">
+                <div class="glass-card rounded-2xl p-6 border border-slate-800">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-book-open text-cyan-400 mr-2"></i>Traveler Micro-Blogs & Journals</h2>
+                            <p class="text-slate-400 text-sm">Personal logs, thoughts, and food reviews from Mark, Danny, Bill, and Rich.</p>
+                        </div>
+                        <!-- Traveler Switcher Buttons -->
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="switchBlogUser('Mark')" id="blog-btn-Mark" class="blog-tab-btn bg-cyan-600 text-xs text-white font-semibold px-3 py-2 rounded-xl transition">Mark</button>
+                            <button onclick="switchBlogUser('Danny')" id="blog-btn-Danny" class="blog-tab-btn bg-slate-800 text-xs text-white font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">Danny</button>
+                            <button onclick="switchBlogUser('Bill')" id="blog-btn-Bill" class="blog-tab-btn bg-slate-800 text-xs text-white font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">Bill</button>
+                            <button onclick="switchBlogUser('Rich')" id="blog-btn-Rich" class="blog-tab-btn bg-slate-800 text-xs text-white font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">Rich</button>
+                        </div>
+                    </div>
+
+                    <!-- New Post Form -->
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 mb-6">
+                        <h3 id="active-blog-title" class="text-sm font-bold text-cyan-300 mb-2">Write new entry as Mark</h3>
+                        <form onsubmit="postBlog(event)" class="space-y-3">
+                            <input type="text" id="blog-headline" placeholder="Headline / Day Title (e.g., Arrived in Hanoi Old Quarter!)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500" required>
+                            <textarea id="blog-body" rows="3" placeholder="Write your journal notes here..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500" required></textarea>
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition">Publish Post</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Blog Posts Stream -->
+                    <div id="blog-posts-container" class="space-y-4">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: LOGISTICS & EXPENSES -->
+            <div id="tab-logistics" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Flight Matrix Table -->
+                    <div class="glass-card rounded-2xl p-6 border border-slate-800">
+                        <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-plane-up text-cyan-400 mr-2"></i>Flight & Train Schedule</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-slate-900/80 text-cyan-400 uppercase">
+                                    <tr>
+                                        <th class="p-3">Route</th>
+                                        <th class="p-3">Date</th>
+                                        <th class="p-3">Flight / Train</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800">
+                                    <tr>
+                                        <td class="p-3 font-semibold text-white">Toronto (YYZ) $\rightarrow$ Hanoi</td>
+                                        <td class="p-3">Feb 1, 2027</td>
+                                        <td class="p-3">AC / Partner Connect</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-semibold text-white">Hanoi $\rightarrow$ Da Nang</td>
+                                        <td class="p-3">Feb 6, 2027</td>
+                                        <td class="p-3">Vietnam Airlines VN161</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-semibold text-white">Hoi An $\rightarrow$ Saigon</td>
+                                        <td class="p-3">Feb 12, 2027</td>
+                                        <td class="p-3">Sleeper Train / Domestic</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-semibold text-white">Saigon (SGN) $\rightarrow$ Toronto</td>
+                                        <td class="p-3">Feb 18, 2027</td>
+                                        <td class="p-3">Return Segment</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Digital Document Safe -->
+                    <div class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-shield-halved text-cyan-400 mr-2"></i>Digital Document Safe</h3>
+                            <p class="text-slate-400 text-sm mb-4">Secure cloud folder links for everyone's e-Visas, passport scans, and travel medical insurance policies.</p>
+                            <ul class="space-y-2 text-sm text-slate-300 mb-6">
+                                <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-cyan-400"></i><span>Mark's & Team e-Visa Copies</span></li>
+                                <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-cyan-400"></i><span>Hotel Booking Vouchers</span></li>
+                                <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-cyan-400"></i><span>Emergency Medical Insurance Policies</span></li>
+                            </ul>
+                        </div>
+                        <a href="https://drive.google.com" target="_blank" class="w-full bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-center font-semibold py-2.5 rounded-xl text-sm transition">Open Secure Google Drive Folder</a>
+                    </div>
+                </div>
+
+                <!-- Quick Expense Logger -->
+                <div class="glass-card rounded-2xl p-6 border border-slate-800">
+                    <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-receipt text-emerald-400 mr-2"></i>Quick VND Expense Logger</h3>
+                    <form onsubmit="addExpense(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
+                        <input type="text" id="exp-item" placeholder="Item / Description (e.g. Bia Hoi & Pho)" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500" required>
+                        <input type="number" id="exp-vnd" placeholder="Amount in VND (e.g. 250000)" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500" required>
+                        <select id="exp-payer" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500">
+                            <option value="Mark">Paid by Mark</option>
+                            <option value="Danny">Paid by Danny</option>
+                            <option value="Bill">Paid by Bill</option>
+                            <option value="Rich">Paid by Rich</option>
+                        </select>
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded-xl text-sm transition">Log Expense</button>
+                    </form>
+                    <div id="expenses-list" class="space-y-2">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: UTILITIES & PACKING -->
+            <div id="tab-tools" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Currency Converter with Visible CAD Ticker -->
+                    <div class="glass-card rounded-2xl p-6 border border-slate-800">
+                        <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-coins text-cyan-400 mr-2"></i>CAD to VND Currency Converter</h3>
+                        <p class="text-xs text-slate-400 mb-4">Baseline Rate: 1 CAD $\approx$ <span id="current-rate-display">18,500</span> VND</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Canadian Dollar (CAD $)</label>
+                                <input type="number" id="cad-input" value="20" oninput="convertCurrency()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold text-lg focus:outline-none focus:border-cyan-500">
+                            </div>
+                            <div class="text-center text-cyan-400 font-bold"><i class="fa-solid fa-arrow-down-long"><i></div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Vietnam Dong (VND ₫)</label>
+                                <input type="text" id="vnd-output" readonly class="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-3 py-2 text-cyan-300 font-bold text-lg">
+                            </div>
+                            <!-- Quick Chips -->
+                            <div class="flex gap-2 pt-2">
+                                <button onclick="setCad(5)" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-700">$5 CAD</button>
+                                <button onclick="setCad(20)" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-700">$20 CAD</button>
+                                <button onclick="setCad(50)" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-700">$50 CAD</button>
+                                <button onclick="setCad(100)" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-700">$100 CAD</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Group Packing Checklist -->
+                    <div class="glass-card rounded-2xl p-6 border border-slate-800">
+                        <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-list-check text-cyan-400 mr-2"></i>Group Packing Essentials</h3>
+                        <div class="space-y-3 text-sm">
+                            <label class="flex items-center space-x-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+                                <input type="checkbox" class="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500 bg-slate-800 border-slate-700">
+                                <span class="text-slate-200">Valid Passports & Printed Vietnam e-Visas</span>
+                            </label>
+                            <label class="flex items-center space-x-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+                                <input type="checkbox" class="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500 bg-slate-800 border-slate-700">
+                                <span class="text-slate-200">Universal Travel Adapters (Type A/C/G)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+                                <input type="checkbox" class="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500 bg-slate-800 border-slate-700">
+                                <span class="text-slate-200">Unlocked Phones for Local eSIMs (Airalo / Viettel)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+                                <input type="checkbox" class="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500 bg-slate-800 border-slate-700">
+                                <span class="text-slate-200">Lightweight Rain Jackets & Comfortable Walking Shoes</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-slate-950/80 border-t border-slate-900 py-4 px-6 text-center text-xs text-slate-500 mt-auto">
+            Vietnam Expedition 2027 Hub • Built for Mark, Danny, Bill, and Rich.
+        </footer>
+    </div>
+
+    <!-- JAVASCRIPT CONTROLS -->
+    <script>
+        // Passcode Logic
+        function unlockHub(e) {
+            e.preventDefault();
+            const val = document.getElementById('passcode-input').value;
+            if(val === '2026') {
+                document.getElementById('lock-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('lock-screen').style.display = 'none';
+                    const app = document.getElementById('main-app');
+                    app.style.opacity = '1';
+                    app.style.pointerEvents = 'auto';
+                }, 400);
+            } else {
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        }
+
+        function lockHubAgain() {
+            const app = document.getElementById('main-app');
+            app.style.opacity = '0';
+            app.style.pointerEvents = 'none';
+            document.getElementById('lock-screen').style.display = 'flex';
+            setTimeout(() => { document.getElementById('lock-screen').style.opacity = '1'; }, 50);
+            document.getElementById('passcode-input').value = '';
+        }
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-cyan-600', 'text-white', 'shadow-md');
+                el.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-800/60');
+            });
+            document.getElementById('tab-' + tabId).classList.add('active');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800/60');
+            activeBtn.classList.add('bg-cyan-600', 'text-white', 'shadow-md');
+        }
+
+        // Trip Dates & Countdown Engine
+        let tripDepDate = new Date("2027-02-01T00:00:00");
+        let tripRetDate = new Date("2027-02-18T23:59:59");
+
+        function toggleDateEditor() {
+            const panel = document.getElementById('date-editor-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function saveTripDates() {
+            const depVal = document.getElementById('input-dep-date').value;
+            const retVal = document.getElementById('input-ret-date').value;
+            if(depVal && retVal) {
+                tripDepDate = new Date(depVal + "T00:00:00");
+                tripRetDate = new Date(retVal + "T23:59:59");
+                document.getElementById('display-dates').innerText = `${tripDepDate.toLocaleDateString()} – ${tripRetDate.toLocaleDateString()}`;
+                toggleDateEditor();
+            }
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            const badge = document.getElementById('countdown-status-badge');
+            const title = document.getElementById('countdown-title');
+            
+            if (now < tripDepDate) {
+                // Phase 1: Pre-trip
+                badge.innerText = "Phase 1: Pre-Trip Countdown";
+                title.innerText = "Countdown to Toronto (YYZ) Departure";
+                const diff = tripDepDate - now;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const mins = Math.floor((diff / 1000 / 60) % 60);
+                const secs = Math.floor((diff / 1000) % 60);
+
+                document.getElementById('days-val').innerText = String(days).padStart(2, '0');
+                document.getElementById('hours-val').innerText = String(hours).padStart(2, '0');
+                document.getElementById('mins-val').innerText = String(mins).padStart(2, '0');
+                document.getElementById('secs-val').innerText = String(secs).padStart(2, '0');
+            } else if (now >= tripDepDate && now <= tripRetDate) {
+                // Phase 2: In-Country
+                badge.innerText = "Active Expedition Mode 🇻🇳";
+                title.innerText = "Enjoying Vietnam - Safe Travels!";
+                const diff = tripRetDate - now;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const mins = Math.floor((diff / 1000 / 60) % 60);
+                const secs = Math.floor((diff / 1000) % 60);
+
+                document.getElementById('days-val').innerText = String(days).padStart(2, '0');
+                document.getElementById('hours-val').innerText = String(hours).padStart(2, '0');
+                document.getElementById('mins-val').innerText = String(mins).padStart(2, '0');
+                document.getElementById('secs-val').innerText = String(secs).padStart(2, '0');
+            } else {
+                // Phase 3: Post-trip
+                badge.innerText = "Expedition Complete";
+                title.innerText = "Welcome Back Home to Canada!";
+                document.getElementById('days-val').innerText = "00";
+                document.getElementById('hours-val').innerText = "00";
+                document.getElementById('mins-val').innerText = "00";
+                document.getElementById('secs-val').innerText = "00";
+            }
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Maps Presets
+        const mapUrls = {
+            'Hanoi': "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.8638558814757!2d105.84117097688258!3d21.028511487539655!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab9bd9861ca1%3A0xe788f86bcfb6ea60!2sHanoi%2C%20Hoan%20Kiem%2C%20Hanoi%2C%20Vietnam!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca",
+            'Ha Long Bay': "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14876.307374029148!2d107.0325159!3d20.9101053!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x314a24e2c882103f%3A0x4460f1e8082664b4!2sHa%20Long%20Bay!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca",
+            'Da Nang': "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3834.195393080974!2d108.22081907684814!3d16.054406339794306!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x314219c13e1a8dcf%3A0x53f3833cb44f2b1d!2sDa%20Nang%2C%20Vietnam!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca",
+            'Ho Chi Minh City': "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4971481515915!2d106.69828557683935!3d10.776889759247653!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f38f9ed8e5b%3A0x534bb03e87858c42!2sHo%20Chi%20Minh%20City%2C%20Vietnam!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca"
+        };
+        function setMapLocation(city) {
+            document.getElementById('google-map-frame').src = mapUrls[city];
+        }
+
+        // Photo Pin Logger
+        let photoPins = [];
+        function addPhotoPin(e) {
+            e.preventDefault();
+            const title = document.getElementById('pin-title').value;
+            const author = document.getElementById('pin-author').value;
+            const notes = document.getElementById('pin-notes').value;
+            photoPins.unshift({ title, author, notes });
+            renderPins();
+            e.target.reset();
+        }
+        function renderPins() {
+            const container = document.getElementById('pins-list');
+            if(photoPins.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-500 italic">No custom photo pins logged yet.</p>';
+                return;
+            }
+            container.innerHTML = photoPins.map(p => `
+                <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-bold text-cyan-400">${p.title}</span> <span class="text-slate-400">by ${p.author}</span>
+                        <p class="text-slate-300 mt-0.5">${p.notes}</p>
+                    </div>
+                    <a href="https://maps.google.com/?q=${encodeURIComponent(p.title + ' Vietnam')}" target="_blank" class="text-cyan-300 hover:underline"><i class="fa-solid fa-location-arrow"></i> Map</a>
+                </div>
+            `).join('');
+        }
+        renderPins();
+
+        // Traveler Blogs
+        let activeBlogUser = 'Mark';
+        let blogsData = { Mark: [], Danny: [], Bill: [], Rich: [] };
+
+        function switchBlogUser(user) {
+            activeBlogUser = user;
+            document.querySelectorAll('.blog-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-cyan-600', 'text-white');
+                btn.classList.add('bg-slate-800', 'text-slate-400');
+            });
+            document.getElementById('blog-btn-' + user).classList.remove('bg-slate-800', 'text-slate-400');
+            document.getElementById('blog-btn-' + user).classList.add('bg-cyan-600', 'text-white');
+            document.getElementById('active-blog-title').innerText = "Write new entry as " + user;
+            renderBlogs();
+        }
+
+        function postBlog(e) {
+            e.preventDefault();
+            const headline = document.getElementById('blog-headline').value;
+            const body = document.getElementById('blog-body').value;
+            blogsData[activeBlogUser].unshift({ headline, body, date: new Date().toLocaleDateString() });
+            renderBlogs();
+            e.target.reset();
+        }
+
+        function renderBlogs() {
+            const container = document.getElementById('blog-posts-container');
+            const posts = blogsData[activeBlogUser];
+            if(posts.length === 0) {
+                container.innerHTML = `<p class="text-sm text-slate-500 italic">No blog posts written by ${activeBlogUser} yet.</p>`;
+                return;
+            }
+            container.innerHTML = posts.map(p => `
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-1">
+                        <h4 class="font-bold text-white text-sm">${p.headline}</h4>
+                        <span class="text-xs text-slate-500">${p.date}</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">${p.body}</p>
+                </div>
+            `).join('');
+        }
+        renderBlogs();
+
+        // Currency Converter
+        const rate = 18500;
+        function convertCurrency() {
+            const cad = document.getElementById('cad-input').value || 0;
+            const vnd = cad * rate;
+            document.getElementById('vnd-output').value = vnd.toLocaleString() + " ₫";
+        }
+        function setCad(val) {
+            document.getElementById('cad-input').value = val;
+            convertCurrency();
+        }
+        convertCurrency();
+
+        // Expense Logger
+        let expenses = [];
+        function addExpense(e) {
+            e.preventDefault();
+            const item = document.getElementById('exp-item').value;
+            const vnd = parseFloat(document.getElementById('exp-vnd').value);
+            const payer = document.getElementById('exp-payer').value;
+            expenses.unshift({ item, vnd, payer });
+            renderExpenses();
+            e.target.reset();
+        }
+        function renderExpenses() {
+            const container = document.getElementById('expenses-list');
+            if(expenses.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-500 italic">No expenses logged yet.</p>';
+                return;
+            }
+            container.innerHTML = expenses.map(ex => `
+                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-semibold text-white">${ex.item}</span>
+                        <span class="text-slate-400 block">Paid by ${ex.payer}</span>
+                    </div>
+                    <span class="text-emerald-400 font-bold">${ex.vnd.toLocaleString()} ₫</span>
+                </div>
+            `).join('');
+        }
+        renderExpenses();
+    </script>
+</body>
+</html>
